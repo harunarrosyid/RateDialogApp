@@ -1,17 +1,15 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    id("maven-publish") // Plugin wajib untuk publikasi library
+    id("maven-publish")
 }
 
 android {
-    // Sesuai dengan domain dan nama modul kamu
     namespace = "com.harunarrosyid.smartratedialog"
     compileSdk = 34
 
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -38,23 +36,4 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-}
-
-// Konfigurasi untuk publikasi ke GitHub / JitPack
-afterEvaluate {
-    configure<org.gradle.api.publish.PublishingExtension> {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-
-                // Username kamu sudah saya masukkan di sini
-                groupId = "com.github.harunarrosyid"
-                artifactId = "smartratedialog"
-                version = "1.0.0"
-            }
-        }
-    }
 }
