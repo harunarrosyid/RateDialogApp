@@ -1,4 +1,4 @@
-package com.harunarrosyid.ratedialogapp
+package com.harunarrosyid.smartratedialog
 
 import android.app.AlertDialog
 import android.content.Context
