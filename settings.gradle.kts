@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RateDialogApp"
+rootProject.name = "smartratedialog"
 include(":app")
 include(":smartratedialog")

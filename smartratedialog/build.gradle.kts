@@ -45,7 +45,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.harunarrosyid"
                 artifactId = "smartratedialog"
-                version = "1.0.3"
+                version = "1.0.4"
             }
         }
     }
