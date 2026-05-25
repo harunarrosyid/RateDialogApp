@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
 }
 
 afterEvaluate {
@@ -45,7 +46,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.harunarrosyid"
                 artifactId = "smartratedialog"
-                version = "1.0.6"
+                version = "1.0.7"
             }
         }
     }

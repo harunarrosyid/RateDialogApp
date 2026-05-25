@@ -9,6 +9,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide // <--- IMPORT GLIDE
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 
 class PromoAdapter(private val items: List<PromoItem>) : RecyclerView.Adapter<PromoAdapter.ViewHolder>() {
 
@@ -27,11 +30,18 @@ class PromoAdapter(private val items: List<PromoItem>) : RecyclerView.Adapter<Pr
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
-        holder.ivIcon.setImageResource(item.iconResId)
         holder.tvTitle.text = item.title
         holder.tvDesc.text = item.description
 
-        // Fungsi klik: Buka URL (Play Store / Web) saat tombol ditekan
+        // ==========================================
+        // KODE BARU: MUAT GAMBAR DARI URL PAKE GLIDE
+        // ==========================================
+        Glide.with(holder.itemView.context)
+            .load(item.iconUrl) // Mengambil dari Direct Link
+            .transform(CenterCrop(), RoundedCorners(16)) // Opsional: Bikin sudut ikon jadi agak bulat
+            .into(holder.ivIcon)
+
+        // Fungsi klik: Buka URL saat tombol ditekan
         val clickListener = View.OnClickListener {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.actionUrl))
@@ -43,7 +53,7 @@ class PromoAdapter(private val items: List<PromoItem>) : RecyclerView.Adapter<Pr
         }
 
         holder.btnAction.setOnClickListener(clickListener)
-        holder.itemView.setOnClickListener(clickListener) // Bisa diklik di mana saja di area tersebut
+        holder.itemView.setOnClickListener(clickListener)
     }
 
     override fun getItemCount(): Int = items.size
