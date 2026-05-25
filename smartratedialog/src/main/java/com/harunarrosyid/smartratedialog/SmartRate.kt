@@ -1,84 +1,105 @@
-package com.harunarrosyid.smartratedialog // Sesuaikan dengan nama package library Anda
+package com.harunarrosyid.smartratedialog
 
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 object SmartRate {
 
-    /**
-     * Menampilkan Dialog Rating dengan opsi kustomisasi teks (Multi-bahasa)
-     */
     fun show(
         context: Context,
         appName: String,
         supportEmail: String,
         packageName: String,
-        // ==========================================
-        // PARAMETER TEKS DENGAN NILAI DEFAULT
-        // ==========================================
+        // Parameter Dialog Bawaan
         titleText: String = "Enjoying $appName?",
         messageText: String = "If you like using our app, please take a moment to rate it!",
         btnRateText: String = "Rate Now",
         btnLaterText: String = "Later",
-        btnFeedbackText: String = "Send Feedback" // Tombol tambahan untuk email keluhan
+        btnFeedbackText: String = "Send Feedback",
+        // Parameter Promosi Silang (Default = kosong)
+        promoApps: List<PromoItem> = emptyList()
     ) {
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle(titleText)
-        builder.setMessage(messageText)
-        builder.setCancelable(false) // Mencegah dialog tertutup jika user klik area luar
+        val bottomSheet = BottomSheetDialog(context)
+        val view = LayoutInflater.from(context).inflate(R.layout.dialog_bottom_smart_rate, null)
+        bottomSheet.setContentView(view)
 
-        // 1. TOMBOL RATE (Buka Play Store)
-        builder.setPositiveButton(btnRateText) { dialog, _ ->
+        // Binding View
+        val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
+        val tvMessage = view.findViewById<TextView>(R.id.tvMessage)
+        val btnRate = view.findViewById<Button>(R.id.btnRate)
+        val btnLater = view.findViewById<Button>(R.id.btnLater)
+        val btnFeedback = view.findViewById<Button>(R.id.btnFeedback)
+
+        val layoutPromo = view.findViewById<LinearLayout>(R.id.layoutPromo)
+        val rvPromo = view.findViewById<RecyclerView>(R.id.rvPromo)
+
+        // Set Teks
+        tvTitle.text = titleText
+        tvMessage.text = messageText
+        btnRate.text = btnRateText
+        btnLater.text = btnLaterText
+        btnFeedback.text = btnFeedbackText
+
+        // Logika Tombol
+        btnRate.setOnClickListener {
             openPlayStore(context, packageName)
-            dialog.dismiss()
+            bottomSheet.dismiss()
         }
 
-        // 2. TOMBOL LATER (Tutup Dialog)
-        builder.setNegativeButton(btnLaterText) { dialog, _ ->
-            dialog.dismiss()
+        btnLater.setOnClickListener {
+            bottomSheet.dismiss()
         }
 
-        // 3. TOMBOL FEEDBACK (Buka Aplikasi Email)
-        // Jika Anda tidak ingin tombol ini muncul, Anda bisa menghapus blok setNeutralButton ini.
         if (supportEmail.isNotEmpty()) {
-            builder.setNeutralButton(btnFeedbackText) { dialog, _ ->
+            btnFeedback.visibility = View.VISIBLE
+            btnFeedback.setOnClickListener {
                 sendFeedbackEmail(context, supportEmail, appName)
-                dialog.dismiss()
+                bottomSheet.dismiss()
             }
+        } else {
+            btnFeedback.visibility = View.GONE
         }
 
-        // Tampilkan Dialog
-        val dialog = builder.create()
-        dialog.show()
+        // ==========================================
+        // LOGIKA PROMOSI SILANG (CROSS-PROMOTION)
+        // ==========================================
+        if (promoApps.isNotEmpty()) {
+            layoutPromo.visibility = View.VISIBLE
+            rvPromo.layoutManager = LinearLayoutManager(context)
+            rvPromo.adapter = PromoAdapter(promoApps)
+        } else {
+            layoutPromo.visibility = View.GONE
+        }
+
+        bottomSheet.show()
     }
 
-    // ====================================================
-    // FUNGSI PENDUKUNG UNTUK MEMBUKA PLAY STORE
-    // ====================================================
     private fun openPlayStore(context: Context, packageName: String) {
         try {
-            // Coba buka menggunakan aplikasi Google Play Store langsung
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            // Jika aplikasi Play Store tidak ada di HP, buka lewat Browser
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
     }
 
-    // ====================================================
-    // FUNGSI PENDUKUNG UNTUK MENGIRIM EMAIL KELUHAN
-    // ====================================================
     private fun sendFeedbackEmail(context: Context, email: String, appName: String) {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:") // Hanya aplikasi email yang akan merespon ini
+            data = Uri.parse("mailto:")
             putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
             putExtra(Intent.EXTRA_SUBJECT, "Feedback for $appName")
             putExtra(Intent.EXTRA_TEXT, "Hello Support Team,\n\nI have some feedback regarding the app:\n")
